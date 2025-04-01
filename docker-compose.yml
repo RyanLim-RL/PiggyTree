@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:    
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASS: ${MONGO_APP_PASS}
+      MONGO_SCRAPER_USER: ${MONGO_SCRAPER_USER}
+      MONGO_SCRAPER_PASS: ${MONGO_SCRAPER_PASS}
+      MONGO_CLASSIFIER_USER: ${MONGO_CLASSIFIER_USER}
+      MONGO_CLASSIFIER_PASS: ${MONGO_CLASSIFIER_PASS}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo --quiet --username ${MONGO_INITDB_ROOT_USERNAME} --password ${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  api:
+    build: ./api
+    env_file: ./api/.env
+    ports:
+    - "8000:8000"
+    depends_on:
+      - mongo
+
+  scraper:
+    build: ./scraper
+    env_file: ./scraper/.env
+    depends_on:
+      - mongo
+
+  classifier:
+    build: ./classifier
+    env_file: ./classifier/.env
+    depends_on:
+      - mongo
+  
+  client:
+    build: ./client  
+    ports:
+      - "3000:3000"
+    
+volumes:
+  mongo-data:
+
+
+    
+    
+
+    

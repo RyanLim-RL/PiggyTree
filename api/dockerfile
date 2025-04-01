@@ -1,0 +1,18 @@
+# Use Node base image
+FROM node:18
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy package files and install deps
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the code
+COPY . .
+
+# Expose port if you run a server (optional)
+EXPOSE 8000
+
+# Run the app
+CMD [ "node", "src/index.js" ]
